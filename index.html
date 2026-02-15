@@ -129,7 +129,7 @@
 </div>
 
 <script>
-    // Database with COMPLETE shared data
+    // Database with SPECIFIC detailed shared data
     const materialsDatabase = {
         "mc4": {
             name: "MC4 Connectors (M/F)",
@@ -162,46 +162,46 @@
             checks: "1) Dimensional Accuracy: Match length, width, and thickness to specs\n2) Material Inspection: Check for surface cracks, fractures, or deformations\n3) Material Used: Verify material (copper, aluminum) meets BOM specs\n4) Corrosion: Inspect for signs of corrosion\n5) Smooth Surface: Free from rough edges or burrs\n6) Uniformity of Plating: Ensure uniform plating (tin or zinc) free from spots\n7) Correct Markings: Verify logo, part number, and batch number stamps\n8) Cleanliness: Surface must be clean and free from dirt/grease\n9) Packaging Integrity: Packaging must be intact"
         },
         "rod": {
-            name: "Earthing Rods",
+            name: "Earthing Rods (Copper Bonded)",
             sampling: "20/60",
             maxDefects: 2,
-            checks: "1) Any Physical damage (Dent, Scratch, cut)\n2) Corrosion\n3) Loose connections\n4) Nut bolt Corrosion\n5) Earthing rod bend\n6) Length of rod\n7) Diameter of rod\n8) Coating thickness"
+            checks: "1) Physical Damage: Check for dents, scratches, or cuts on the copper coating.\n2) Corrosion: Inspect for signs of oxidation or corrosion.\n3) Loose connections/threads: Verify threads are clean and not damaged.\n4) Rod Straightness: Rod must be straight, with a tolerance of < 2mm per meter.\n5) Length & Diameter: Verify length and diameter (e.g., 14.2mm or 17.2mm) with a micrometer, check tolerance.\n6) Coating Thickness: Copper bonding thickness must be min 250 microns."
         },
         "chamber": {
-            name: "Earthing Chambers",
+            name: "Earthing Chambers (Concrete/PVC)",
             sampling: "5/50",
             maxDefects: 2,
-            checks: "1) Material Grade\n2) Thickness\n3) Discoloration\n4) Dimension\n5) Height\n6) Weight\n7) Damage\n8) Cut\n9) Scratch"
+            checks: "1) Material Grade: Check for cracks (concrete) or deformation (PVC).\n2) Dimensions: Verify diameter, height, and wall thickness.\n3) Weight: Check if weight matches specifications.\n4) Damage: Inspect for cuts, breaks, or manufacturing defects.\n5) Cover: Verify lid fits properly and can handle load."
         },
         "powder": {
-            name: "Bentonite Powder",
+            name: "Bentonite Powder (Backfill)",
             sampling: "20/60",
             maxDefects: 2,
-            checks: "1) Packing\n2) Weight\n3) Expiry date\n4) Cut\n5) Damage\n6) Label"
+            checks: "1) Packing Integrity: Check for moisture or tears in bags.\n2) Weight: Verify net weight per bag.\n3) Labeling: Check for manufacturer details, batch number, and expiry date.\n4) Physical Inspection: Powder should be fine, free from lumps."
         },
         "conduit": {
-            name: "PVC Conduits/Acc",
+            name: "PVC Conduits & Accessories",
             sampling: "80/800",
             maxDefects: 10,
-            checks: "1) Any Physical damage\n2) Any Scratch\n3) Discoloration\n4) Any Bend\n5) Diameter\n6) Thickness\n7) Length\n8) Material grade\n9) Colour\n10) Standard followed"
+            checks: "1) Conduit Type: Check for Pipe, Bend, Elbow, Tee, Socket.\n2) Physical Damage: Check for cracks, dents, or brittle material.\n3) Dimensions: Verify outside diameter, inside diameter, and wall thickness (Tolerance: ±0.2mm).\n4) Length: Check pipe length (Tolerance: ±10mm).\n5) Finish: Interior must be smooth to prevent cable damage.\n6) Material: PVC must be fire retardant (FRLS) and UV resistant.\n7) Accessories: Ensure bends and elbows have smooth internal radii and proper fitment."
         },
         "cable": {
-            name: "DC Cable 4 SQMM",
+            name: "DC Cable 4 SQMM (Solar)",
             sampling: "8/30",
             maxDefects: 1,
-            checks: "1) Packaging Damage: Crushing, Punctures, Water damage\n2) Labeling Errors: Check type, category, and specifications\n3) Physical Damage: Cuts, frayed wire\n4) Insulation Defect: Cracks or punctures in insulation\n5) Manufacturing Defect: Inconsistent diameter, improper stranding, non-uniform insulation\n6) Certification: All appropriate certifications\n7) Testing: Insulation Resistance Test, Continuity Test, Conductor Resistance Test, High-Voltage Test"
+            checks: "1) Sheath Damage: Check for cuts, punctures, or water ingress.\n2) Marking: Verify TUV certification, cable size, and voltage rating (1500V DC) are printed.\n3) Conductor: Copper must be tinned, check for uniform strand diameter.\n4) Insulation Thickness: Must meet specs (Tolerance: ±0.1mm).\n5) Insulation Testing: Perform continuity and insulation resistance test (Megger test).\n6) Flexibility: Cable should be flexible, check for brittleness."
         },
         "tie": {
             name: "Cable Ties (Nylon/SS)",
             sampling: "80/1000",
             maxDefects: 7,
-            checks: "1) Size verification\n2) Damage check\n3) Discoloration check\n4) Dimension check\n5) Grip lock functionality\n6) Thickness check"
+            checks: "1) Type: Specify Nylon (UV resistant) or Stainless Steel (Ball Lock).\n2) Length & Width: Verify dimensions (Tolerance: ±2mm).\n3) Physical Condition: Check for cracks or manufacturing defects.\n4) Locking Mechanism: Test locking functionality (must not slip back).\n5) Discolouration: Nylon should be black for UV resistance, not grey/white."
         },
         "meter": {
             name: "Meter Box",
             sampling: "10/100",
             maxDefects: 1,
-            checks: "1) Documentation & Identification: Verify PO details, Serial number, IS/IEC compliance\n2) Material & Construction: Confirm material (MS/FRP/Polycarbonate), wall thickness, coating, welding uniformity\n3) Dimensions & Design: Box size, Door alignment, Locking arrangement, Cable entry glands\n4) Surface & Finish: No dents/scratches/rust, coating thickness, no sharp edges\n5) Electrical Fitments: Meter plate, Terminal blocks, Earthing point marking, insulation\n6) Weather Protection: IP rating (IP54/IP65), Rubber gasket, Hinges corrosion-resistant\n7) Quantity Verification: Total number and random sampling"
+            checks: "1) Material: Verify MS, FRP, or Polycarbonate as per specs.\n2) Thickness: Check wall thickness (Tolerance: ±0.5mm).\n3) Coating: MS boxes must have uniform powder coating (Check for scratches/rust).\n4) Welding: Check joints for uniformity and strength.\n5) Door Alignment: Door should open/close smoothly without jamming.\n6) IP Rating: Check gasket condition for IP65/IP54 sealing.\n7) Locking: Check padlock/key lock functionality."
         }
     };
 
