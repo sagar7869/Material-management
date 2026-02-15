@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QC Inspection Tool</title>
+    <title>Comprehensive QC Inspection Tool</title>
     <style>
         :root {
             --primary: #2c3e50;
@@ -22,55 +22,21 @@
 
         h1, h2 { text-align: center; color: var(--primary); }
 
-        .container { max-width: 1200px; margin: 0 auto; }
+        .container { max-width: 1000px; margin: 0 auto; }
 
-        /* Search Bar */
-        .search-container {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        #searchInput {
-            padding: 12px;
-            width: 80%;
-            max-width: 400px;
-            border-radius: 20px;
-            border: 2px solid var(--accent);
-            font-size: 16px;
-        }
-
-        /* Material Grid */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            border-left: 5px solid var(--accent);
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .card:hover { transform: translateY(-5px); }
-        .card h3 { margin-top: 0; color: var(--primary); }
-        .card p { font-size: 14px; color: #555; margin: 5px 0; }
-        .checklist-small { font-size: 12px; color: #777; margin-top: 10px; display: none; }
-
-        /* Calculator */
-        .calculator {
+        /* Calculator/Selector Box */
+        .panel {
             background: white;
             padding: 25px;
             border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
         }
+
         .calc-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input[type="number"], select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
-        
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: var(--primary); }
+        input[type="number"], select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; font-size: 16px; }
+
         button {
             padding: 12px 20px;
             background-color: var(--primary);
@@ -80,6 +46,39 @@
             cursor: pointer;
             width: 100%;
             font-size: 16px;
+            font-weight: bold;
+        }
+
+        /* Data Display Area */
+        .display-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: none; /* Hidden by default */
+            border-left: 5px solid var(--accent);
+        }
+
+        .display-card h3 { margin-top: 0; color: var(--accent); border-bottom: 2px solid var(--light); padding-bottom: 10px; }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .info-item { background: var(--light); padding: 10px; border-radius: 5px; }
+        .info-item strong { display: block; color: var(--primary); }
+
+        .checklist-display {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #eee;
+            font-size: 14px;
+            white-space: pre-wrap; /* Preserves formatting */
+            color: #333;
+            line-height: 1.6;
         }
 
         .result-box {
@@ -88,6 +87,7 @@
             border-radius: 5px;
             font-weight: bold;
             display: none;
+            text-align: center;
         }
         .pass { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .fail { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
@@ -98,78 +98,146 @@
 <div class="container">
     <h1>Quality Control System</h1>
 
-    <div class="search-container">
-        <input type="text" id="searchInput" placeholder="Search material..." onkeyup="filterMaterials()">
-    </div>
-
-    <div class="grid" id="materialGrid"></div>
-
-    <div class="calculator">
-        <h2>Inspection Calculator</h2>
+    <div class="panel">
         <div class="calc-group">
-            <label>Select Material</label>
-            <select id="calcMaterialSelect" onchange="updateCalcFields()">
+            <label>Select Material for Inspection</label>
+            <select id="materialSelect" onchange="displayMaterialData()">
                 <option value="">-- Choose a Material --</option>
             </select>
         </div>
         <div class="calc-group">
             <label>Total Received Quantity</label>
-            <input type="number" id="receivedQty" placeholder="Enter total quantity">
+            <input type="number" id="receivedQty" placeholder="Enter total quantity received">
         </div>
-        <button onclick="calculateInspection()">Calculate Sample & Result</button>
+        <button onclick="calculateInspection()">Calculate Sample & View Checklist</button>
+    </div>
+
+    <div id="displayCard" class="display-card">
+        <h3 id="displayName"></h3>
+        
+        <div class="info-grid">
+            <div class="info-item"><strong>Sampling Ratio</strong><span id="displaySampling"></span></div>
+            <div class="info-item"><strong>Acceptance Criteria</strong><span id="displayCriteria"></span></div>
+        </div>
+
+        <div style="margin-top:15px;"><strong>Full Inspection Checklist & Specifications:</strong>
+            <div id="displayChecks" class="checklist-display"></div>
+        </div>
         
         <div id="resultBox" class="result-box"></div>
     </div>
 </div>
 
 <script>
-    // Database (Same as before, with added data)
+    // Database with COMPLETE shared data
     const materialsDatabase = {
-        "mc4": { name: "MC4 Connectors (M/F)", sampling: "125/800", maxDefects: 14, checks: "Rust, Bend, Damage, Lock, End Cap, Scratch, Discolouration" },
-        "inverter": { name: "Inverter", sampling: "20/100", maxDefects: null, checks: "Packing, Connector, Lock, Bracket, Earthing, Fan, Display" },
-        "dcdb": { name: "ACDB/DCDB Box", sampling: "10/100", maxDefects: 1, checks: "Scratch, Labeling, Cable Connections, Insulation" },
-        "optimizer": { name: "Optimizer", sampling: "32/100", maxDefects: null, checks: "Packing, Label, MC4 Connector, Cable, Bracket, Heat Sink" },
-        "lug": { name: "Cable Lug", sampling: "50/1000", maxDefects: 2, checks: "Dimensions, Surface, Material, Corrosion, Plating" },
-        "rod": { name: "Earthing Rods", sampling: "20/60", maxDefects: 2, checks: "Damage, Corrosion, Bend, Coating" },
-        "chamber": { name: "Earthing Chambers", sampling: "5/50", maxDefects: 2, checks: "Grade, Thickness, Dimension, Damage" },
-        "powder": { name: "Bentonite Powder", sampling: "20/60", maxDefects: 2, checks: "Packing, Weight, Label" },
-        "conduit": { name: "PVC Conduits/Acc", sampling: "80/800", maxDefects: 10, checks: "Damage, Scratch, Discoloration, Bend, Thickness" },
-        "cable": { name: "DC Cable 4 SQMM", sampling: "8/30", maxDefects: 1, checks: "Packing, Label, Damage, Insulation, Testing" },
-        "tie": { name: "Cable Ties (Nylon/SS)", sampling: "80/1000", maxDefects: 7, checks: "Size, Damage, Dimension, Lock, Thickness" },
-        "meter": { name: "Meter Box", sampling: "10/100", maxDefects: 1, checks: "Thickness, Coating, Welding, IP Rating" }
+        "mc4": {
+            name: "MC4 Connectors (M/F)",
+            sampling: "125/800",
+            maxDefects: 14,
+            checks: "1) Rust on connector surface\n2) Bent pins or contacts\n3) Physical damage to plastic housing\n4) Functional check of self-locking mechanism\n5) Tightness of end cap sleeve\n6) Scratches or dents on connector\n7) Discolouration of plastic or metal parts"
+        },
+        "inverter": {
+            name: "Inverter",
+            sampling: "20/100",
+            maxDefects: null,
+            checks: "1) Check box packing for damage\n2) Verify batch no. marking\n3) Verify quantity\n4) Inspect for missing parts or damage\n5) Check all connectors (AC/DC) for damage\n6) Check locking arrangement\n7) Inspect mounting bracket for damage/corrosion\n8) Verify physical dimensions\n9) Check earthing point connection\n10) Inspect cooling fans and ventilation\n11) Verify display functionality\n12) Check for loose components internally\n13) Verify IP protection rating\n14) Check packaging weight\n15) Verify manual and documentation availability"
+        },
+        "dcdb": {
+            name: "ACDB/DCDB Box",
+            sampling: "10/100",
+            maxDefects: 1,
+            checks: "1) Documentation: Review as-built drawings\n2) Exterior Condition: Check for scratches, physical cracks, and physical dents\n3) Accessibility and Clearance: Components inside box must be easily accessible\n4) Labeling and Identification: Components must be properly labeled with ratings\n5) Cable Connections & Terminations: Inspect for damage, fraying, or loose connections\n6) MCB and SPD: Check condition of MCB or SPD within the box\n7) Wiring and Insulation: Inspect internal wiring for loose connections or exposed wires\n8) Environmental Factors: Ensure box is appropriately sealed"
+        },
+        "optimizer": {
+            name: "Optimizer",
+            sampling: "32/100",
+            maxDefects: null,
+            checks: "1) Optimizer Box Packing: Verify box packing, batch no. marking, and quantity\n2) OEM Tag / Label: Verify OEM Tag is clearly visible and not removing\n3) MC4 Connector: Check cross mating, pin crimping, sleeve cover tightness, damage, and IP67 protection\n4) Cable: Verify no joint in wiring, insulation color (Red/Black), TUV Spec, and damage\n5) Optimizer Mounting bracket: Verify bend, corrosion, hole size (29.8*8.2mm), thickness (2.0mm), and dimensions\n6) Heat Sink: Check fin bend, width, height, and number of fins\n7) Hardware: Verify fastener Screw/bolt availability, size (5/16 inch, 1/4 inch), and SST star washer\n8) Certificate: Check Test Certificate and warranty card\n9) Symbol information: Verify Electronic waste, Hot Caution sign, and Double insulation"
+        },
+        "lug": {
+            name: "Cable Lug",
+            sampling: "50/1000",
+            maxDefects: 2,
+            checks: "1) Dimensional Accuracy: Match length, width, and thickness to specs\n2) Material Inspection: Check for surface cracks, fractures, or deformations\n3) Material Used: Verify material (copper, aluminum) meets BOM specs\n4) Corrosion: Inspect for signs of corrosion\n5) Smooth Surface: Free from rough edges or burrs\n6) Uniformity of Plating: Ensure uniform plating (tin or zinc) free from spots\n7) Correct Markings: Verify logo, part number, and batch number stamps\n8) Cleanliness: Surface must be clean and free from dirt/grease\n9) Packaging Integrity: Packaging must be intact"
+        },
+        "rod": {
+            name: "Earthing Rods",
+            sampling: "20/60",
+            maxDefects: 2,
+            checks: "1) Any Physical damage (Dent, Scratch, cut)\n2) Corrosion\n3) Loose connections\n4) Nut bolt Corrosion\n5) Earthing rod bend\n6) Length of rod\n7) Diameter of rod\n8) Coating thickness"
+        },
+        "chamber": {
+            name: "Earthing Chambers",
+            sampling: "5/50",
+            maxDefects: 2,
+            checks: "1) Material Grade\n2) Thickness\n3) Discoloration\n4) Dimension\n5) Height\n6) Weight\n7) Damage\n8) Cut\n9) Scratch"
+        },
+        "powder": {
+            name: "Bentonite Powder",
+            sampling: "20/60",
+            maxDefects: 2,
+            checks: "1) Packing\n2) Weight\n3) Expiry date\n4) Cut\n5) Damage\n6) Label"
+        },
+        "conduit": {
+            name: "PVC Conduits/Acc",
+            sampling: "80/800",
+            maxDefects: 10,
+            checks: "1) Any Physical damage\n2) Any Scratch\n3) Discoloration\n4) Any Bend\n5) Diameter\n6) Thickness\n7) Length\n8) Material grade\n9) Colour\n10) Standard followed"
+        },
+        "cable": {
+            name: "DC Cable 4 SQMM",
+            sampling: "8/30",
+            maxDefects: 1,
+            checks: "1) Packaging Damage: Crushing, Punctures, Water damage\n2) Labeling Errors: Check type, category, and specifications\n3) Physical Damage: Cuts, frayed wire\n4) Insulation Defect: Cracks or punctures in insulation\n5) Manufacturing Defect: Inconsistent diameter, improper stranding, non-uniform insulation\n6) Certification: All appropriate certifications\n7) Testing: Insulation Resistance Test, Continuity Test, Conductor Resistance Test, High-Voltage Test"
+        },
+        "tie": {
+            name: "Cable Ties (Nylon/SS)",
+            sampling: "80/1000",
+            maxDefects: 7,
+            checks: "1) Size verification\n2) Damage check\n3) Discoloration check\n4) Dimension check\n5) Grip lock functionality\n6) Thickness check"
+        },
+        "meter": {
+            name: "Meter Box",
+            sampling: "10/100",
+            maxDefects: 1,
+            checks: "1) Documentation & Identification: Verify PO details, Serial number, IS/IEC compliance\n2) Material & Construction: Confirm material (MS/FRP/Polycarbonate), wall thickness, coating, welding uniformity\n3) Dimensions & Design: Box size, Door alignment, Locking arrangement, Cable entry glands\n4) Surface & Finish: No dents/scratches/rust, coating thickness, no sharp edges\n5) Electrical Fitments: Meter plate, Terminal blocks, Earthing point marking, insulation\n6) Weather Protection: IP rating (IP54/IP65), Rubber gasket, Hinges corrosion-resistant\n7) Quantity Verification: Total number and random sampling"
+        }
     };
 
-    function init() {
-        const grid = document.getElementById('materialGrid');
-        const select = document.getElementById('calcMaterialSelect');
-        
+    // Populate Selector
+    function populateSelector() {
+        const select = document.getElementById('materialSelect');
         for (let key in materialsDatabase) {
-            let mat = materialsDatabase[key];
-            // Create Card
-            grid.innerHTML += `
-                <div class="card" data-name="${mat.name.toLowerCase()}">
-                    <h3>${mat.name}</h3>
-                    <p><strong>Sampling:</strong> ${mat.sampling}</p>
-                    <p><strong>Max Defects:</strong> ${mat.maxDefects || 'TBD'}</p>
-                </div>
-            `;
-            // Add to Selector
-            select.innerHTML += `<option value="${key}">${mat.name}</option>`;
+            let option = document.createElement('option');
+            option.value = key;
+            option.text = materialsDatabase[key].name;
+            select.add(option);
         }
     }
 
-    // Search Bar Function
-    function filterMaterials() {
-        const query = document.getElementById('searchInput').value.toLowerCase();
-        const cards = document.querySelectorAll('.card');
-        cards.forEach(card => {
-            card.style.display = card.getAttribute('data-name').includes(query) ? "block" : "none";
-        });
+    // Display Data based on Selection
+    function displayMaterialData() {
+        const key = document.getElementById('materialSelect').value;
+        const card = document.getElementById('displayCard');
+        
+        if (!key) {
+            card.style.display = "none";
+            return;
+        }
+
+        const mat = materialsDatabase[key];
+        card.style.display = "block";
+        document.getElementById('displayName').innerText = mat.name;
+        document.getElementById('displaySampling').innerText = mat.sampling || "TBD";
+        document.getElementById('displayCriteria').innerText = mat.maxDefects !== null ? `≤ ${mat.maxDefects} defects` : "TBD";
+        document.getElementById('displayChecks').innerText = mat.checks;
+        document.getElementById('resultBox').style.display = "none"; // Hide previous result
     }
 
-    // Calculator Function
+    // Calculator Logic
     function calculateInspection() {
-        const key = document.getElementById('calcMaterialSelect').value;
+        const key = document.getElementById('materialSelect').value;
         const received = parseInt(document.getElementById('receivedQty').value);
         const resultBox = document.getElementById('resultBox');
         
@@ -179,20 +247,27 @@
         }
 
         const mat = materialsDatabase[key];
+        resultBox.style.display = "block";
+        
+        if (!mat.sampling) {
+            resultBox.className = "result-box fail";
+            resultBox.innerHTML = `Sampling ratio not defined for ${mat.name}.`;
+            return;
+        }
+        
         const ratio = mat.sampling.split('/');
         const sampleSize = Math.ceil(received * (parseInt(ratio[0]) / parseInt(ratio[1])));
         
-        resultBox.style.display = "block";
-        resultBox.className = "result-box pass"; // Default style
+        resultBox.className = "result-box pass";
         resultBox.innerHTML = `
             <strong>Material:</strong> ${mat.name}<br>
             <strong>Total Received:</strong> ${received}<br>
             <strong>Sample Size to Test:</strong> ${sampleSize}<br>
-            <strong>Max Defects Allowed:</strong> ${mat.maxDefects || 'TBD'}
+            <strong>Max Defects Allowed:</strong> ${mat.maxDefects !== null ? mat.maxDefects : 'TBD'}
         `;
     }
 
-    init();
+    populateSelector();
 </script>
 
 </body>
