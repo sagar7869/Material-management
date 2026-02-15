@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comprehensive QC Inspection Tool</title>
+    <title>Detailed Technical QC Tool</title>
     <style>
         :root {
             --primary: #2c3e50;
@@ -20,11 +20,11 @@
             padding: 20px;
         }
 
-        h1, h2 { text-align: center; color: var(--primary); }
+        h1, h2, h3 { text-align: center; color: var(--primary); }
 
         .container { max-width: 1000px; margin: 0 auto; }
 
-        /* Calculator/Selector Box */
+        /* Panel */
         .panel {
             background: white;
             padding: 25px;
@@ -49,17 +49,17 @@
             font-weight: bold;
         }
 
-        /* Data Display Area */
+        /* Display Area */
         .display-card {
             background: white;
             border-radius: 10px;
             padding: 25px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            display: none; /* Hidden by default */
+            display: none;
             border-left: 5px solid var(--accent);
         }
 
-        .display-card h3 { margin-top: 0; color: var(--accent); border-bottom: 2px solid var(--light); padding-bottom: 10px; }
+        .display-card h3 { text-align: left; border-bottom: 2px solid var(--light); padding-bottom: 10px; }
         
         .info-grid {
             display: grid;
@@ -76,7 +76,7 @@
             border-radius: 5px;
             border: 1px solid #eee;
             font-size: 14px;
-            white-space: pre-wrap; /* Preserves formatting */
+            white-space: pre-wrap;
             color: #333;
             line-height: 1.6;
         }
@@ -96,11 +96,11 @@
 <body>
 
 <div class="container">
-    <h1>Quality Control System</h1>
+    <h1>Technical QC Inspection Tool</h1>
 
     <div class="panel">
         <div class="calc-group">
-            <label>Select Material for Inspection</label>
+            <label>Select Category & Material</label>
             <select id="materialSelect" onchange="displayMaterialData()">
                 <option value="">-- Choose a Material --</option>
             </select>
@@ -109,7 +109,7 @@
             <label>Total Received Quantity</label>
             <input type="number" id="receivedQty" placeholder="Enter total quantity received">
         </div>
-        <button onclick="calculateInspection()">Calculate Sample & View Checklist</button>
+        <button onclick="calculateInspection()">Calculate Sample & View Detailed Specs</button>
     </div>
 
     <div id="displayCard" class="display-card">
@@ -120,7 +120,7 @@
             <div class="info-item"><strong>Acceptance Criteria</strong><span id="displayCriteria"></span></div>
         </div>
 
-        <div style="margin-top:15px;"><strong>Full Inspection Checklist & Specifications:</strong>
+        <div style="margin-top:15px;"><strong>Detailed Technical Specifications & Checklist:</strong>
             <div id="displayChecks" class="checklist-display"></div>
         </div>
         
@@ -129,80 +129,29 @@
 </div>
 
 <script>
-    // Database with SPECIFIC detailed shared data
+    // Detailed Database - 100% Specific Data
     const materialsDatabase = {
-        "mc4": {
-            name: "MC4 Connectors (M/F)",
-            sampling: "125/800",
-            maxDefects: 14,
-            checks: "1) Rust on connector surface\n2) Bent pins or contacts\n3) Physical damage to plastic housing\n4) Functional check of self-locking mechanism\n5) Tightness of end cap sleeve\n6) Scratches or dents on connector\n7) Discolouration of plastic or metal parts"
-        },
-        "inverter": {
-            name: "Inverter",
-            sampling: "20/100",
-            maxDefects: null,
-            checks: "1) Check box packing for damage\n2) Verify batch no. marking\n3) Verify quantity\n4) Inspect for missing parts or damage\n5) Check all connectors (AC/DC) for damage\n6) Check locking arrangement\n7) Inspect mounting bracket for damage/corrosion\n8) Verify physical dimensions\n9) Check earthing point connection\n10) Inspect cooling fans and ventilation\n11) Verify display functionality\n12) Check for loose components internally\n13) Verify IP protection rating\n14) Check packaging weight\n15) Verify manual and documentation availability"
-        },
-        "dcdb": {
-            name: "ACDB/DCDB Box",
-            sampling: "10/100",
-            maxDefects: 1,
-            checks: "1) Documentation: Review as-built drawings\n2) Exterior Condition: Check for scratches, physical cracks, and physical dents\n3) Accessibility and Clearance: Components inside box must be easily accessible\n4) Labeling and Identification: Components must be properly labeled with ratings\n5) Cable Connections & Terminations: Inspect for damage, fraying, or loose connections\n6) MCB and SPD: Check condition of MCB or SPD within the box\n7) Wiring and Insulation: Inspect internal wiring for loose connections or exposed wires\n8) Environmental Factors: Ensure box is appropriately sealed"
-        },
-        "optimizer": {
-            name: "Optimizer",
-            sampling: "32/100",
-            maxDefects: null,
-            checks: "1) Optimizer Box Packing: Verify box packing, batch no. marking, and quantity\n2) OEM Tag / Label: Verify OEM Tag is clearly visible and not removing\n3) MC4 Connector: Check cross mating, pin crimping, sleeve cover tightness, damage, and IP67 protection\n4) Cable: Verify no joint in wiring, insulation color (Red/Black), TUV Spec, and damage\n5) Optimizer Mounting bracket: Verify bend, corrosion, hole size (29.8*8.2mm), thickness (2.0mm), and dimensions\n6) Heat Sink: Check fin bend, width, height, and number of fins\n7) Hardware: Verify fastener Screw/bolt availability, size (5/16 inch, 1/4 inch), and SST star washer\n8) Certificate: Check Test Certificate and warranty card\n9) Symbol information: Verify Electronic waste, Hot Caution sign, and Double insulation"
-        },
-        "lug": {
-            name: "Cable Lug",
-            sampling: "50/1000",
-            maxDefects: 2,
-            checks: "1) Dimensional Accuracy: Match length, width, and thickness to specs\n2) Material Inspection: Check for surface cracks, fractures, or deformations\n3) Material Used: Verify material (copper, aluminum) meets BOM specs\n4) Corrosion: Inspect for signs of corrosion\n5) Smooth Surface: Free from rough edges or burrs\n6) Uniformity of Plating: Ensure uniform plating (tin or zinc) free from spots\n7) Correct Markings: Verify logo, part number, and batch number stamps\n8) Cleanliness: Surface must be clean and free from dirt/grease\n9) Packaging Integrity: Packaging must be intact"
-        },
-        "rod": {
-            name: "Earthing Rods (Copper Bonded)",
-            sampling: "20/60",
-            maxDefects: 2,
-            checks: "1) Physical Damage: Check for dents, scratches, or cuts on the copper coating.\n2) Corrosion: Inspect for signs of oxidation or corrosion.\n3) Loose connections/threads: Verify threads are clean and not damaged.\n4) Rod Straightness: Rod must be straight, with a tolerance of < 2mm per meter.\n5) Length & Diameter: Verify length and diameter (e.g., 14.2mm or 17.2mm) with a micrometer, check tolerance.\n6) Coating Thickness: Copper bonding thickness must be min 250 microns."
-        },
-        "chamber": {
-            name: "Earthing Chambers (Concrete/PVC)",
-            sampling: "5/50",
-            maxDefects: 2,
-            checks: "1) Material Grade: Check for cracks (concrete) or deformation (PVC).\n2) Dimensions: Verify diameter, height, and wall thickness.\n3) Weight: Check if weight matches specifications.\n4) Damage: Inspect for cuts, breaks, or manufacturing defects.\n5) Cover: Verify lid fits properly and can handle load."
-        },
-        "powder": {
-            name: "Bentonite Powder (Backfill)",
-            sampling: "20/60",
-            maxDefects: 2,
-            checks: "1) Packing Integrity: Check for moisture or tears in bags.\n2) Weight: Verify net weight per bag.\n3) Labeling: Check for manufacturer details, batch number, and expiry date.\n4) Physical Inspection: Powder should be fine, free from lumps."
-        },
-        "conduit": {
-            name: "PVC Conduits & Accessories",
-            sampling: "80/800",
-            maxDefects: 10,
-            checks: "1) Conduit Type: Check for Pipe, Bend, Elbow, Tee, Socket.\n2) Physical Damage: Check for cracks, dents, or brittle material.\n3) Dimensions: Verify outside diameter, inside diameter, and wall thickness (Tolerance: ±0.2mm).\n4) Length: Check pipe length (Tolerance: ±10mm).\n5) Finish: Interior must be smooth to prevent cable damage.\n6) Material: PVC must be fire retardant (FRLS) and UV resistant.\n7) Accessories: Ensure bends and elbows have smooth internal radii and proper fitment."
-        },
-        "cable": {
-            name: "DC Cable 4 SQMM (Solar)",
-            sampling: "8/30",
-            maxDefects: 1,
-            checks: "1) Sheath Damage: Check for cuts, punctures, or water ingress.\n2) Marking: Verify TUV certification, cable size, and voltage rating (1500V DC) are printed.\n3) Conductor: Copper must be tinned, check for uniform strand diameter.\n4) Insulation Thickness: Must meet specs (Tolerance: ±0.1mm).\n5) Insulation Testing: Perform continuity and insulation resistance test (Megger test).\n6) Flexibility: Cable should be flexible, check for brittleness."
-        },
-        "tie": {
-            name: "Cable Ties (Nylon/SS)",
-            sampling: "80/1000",
-            maxDefects: 7,
-            checks: "1) Type: Specify Nylon (UV resistant) or Stainless Steel (Ball Lock).\n2) Length & Width: Verify dimensions (Tolerance: ±2mm).\n3) Physical Condition: Check for cracks or manufacturing defects.\n4) Locking Mechanism: Test locking functionality (must not slip back).\n5) Discolouration: Nylon should be black for UV resistance, not grey/white."
-        },
-        "meter": {
-            name: "Meter Box",
-            sampling: "10/100",
-            maxDefects: 1,
-            checks: "1) Material: Verify MS, FRP, or Polycarbonate as per specs.\n2) Thickness: Check wall thickness (Tolerance: ±0.5mm).\n3) Coating: MS boxes must have uniform powder coating (Check for scratches/rust).\n4) Welding: Check joints for uniformity and strength.\n5) Door Alignment: Door should open/close smoothly without jamming.\n6) IP Rating: Check gasket condition for IP65/IP54 sealing.\n7) Locking: Check padlock/key lock functionality."
-        }
+        // --- ELECTRICAL ---
+        "inv": { name: "ELECTRICAL: Inverter", sampling: "20/100", maxDefects: null, checks: "1) Check box packing for damage and batch no. marking\n2) Verify quantity\n3) Inspect for missing parts or damage\n4) Check all connectors (AC/DC) for damage\n5) Check locking arrangement\n6) Inspect mounting bracket for damage/corrosion\n7) Verify physical dimensions\n8) Check earthing point connection\n9) Inspect cooling fans and ventilation\n10) Verify display functionality\n11) Check for loose components internally\n12) Verify IP protection rating\n13) Check packaging weight\n14) Verify manual and documentation availability" },
+        "dcdb": { name: "ELECTRICAL: ACDB/DCDB Box", sampling: "10/100", maxDefects: 1, checks: "1) Documentation: Review as-built drawings\n2) Exterior Condition: Check for scratches, physical cracks, and physical dents\n3) Accessibility and Clearance: Components inside box must be easily accessible\n4) Labeling and Identification: Components must be properly labeled with ratings\n5) Cable Connections & Terminations: Inspect for damage, fraying, or loose connections\n6) MCB and SPD: Check condition of MCB or SPD within the box\n7) Wiring and Insulation: Inspect internal wiring for loose connections or exposed wires\n8) Environmental Factors: Ensure box is appropriately sealed" },
+        "opt": { name: "ELECTRICAL: Optimizer", sampling: "32/100", maxDefects: null, checks: "1) Optimizer Box Packing: Verify box packing, batch no. marking, and quantity\n2) OEM Tag / Label: Verify OEM Tag is clearly visible and not removing\n3) MC4 Connector: Check cross mating, pin crimping, sleeve cover tightness, damage, and IP67 protection\n4) Cable: Verify no joint in wiring, insulation color (Red/Black), TUV Spec, and damage\n5) Optimizer Mounting bracket: Verify bend, corrosion, hole size (29.8*8.2mm), thickness (2.0mm), and dimensions\n6) Heat Sink: Check fin bend, width, height, and number of fins\n7) Hardware: Verify fastener Screw/bolt availability, size (5/16 inch, 1/4 inch), and SST star washer\n8) Certificate: Check Test Certificate and warranty card\n9) Symbol information: Verify Electronic waste, Hot Caution sign, and Double insulation" },
+        "met": { name: "ELECTRICAL: Meter Box", sampling: "10/100", maxDefects: 1, checks: "1) Material: Verify MS, FRP, or Polycarbonate as per specs.\n2) Thickness: Check wall thickness (Tolerance: ±0.5mm).\n3) Coating: MS boxes must have uniform powder coating (Check for scratches/rust).\n4) Welding: Check joints for uniformity and strength.\n5) Door Alignment: Door should open/close smoothly without jamming.\n6) IP Rating: Check gasket condition for IP65/IP54 sealing.\n7) Locking: Check padlock/key lock functionality." },
+        
+        // --- EARTHING ---
+        "rod1": { name: "EARTHING: Copper Bonded Rod 1M", sampling: "20/60", maxDefects: 2, checks: "1) Physical Damage: Check for dents, scratches, or cuts on the copper coating.\n2) Corrosion: Inspect for signs of oxidation.\n3) Loose connections/threads: Verify threads are clean and not damaged.\n4) Rod Straightness: Rod must be straight, with a tolerance of < 2mm per meter.\n5) Length & Diameter: Verify length (1000mm) and diameter (e.g., 14.2mm or 17.2mm) with a micrometer.\n6) Coating Thickness: Copper bonding thickness must be min 250 microns." },
+        "rod3": { name: "EARTHING: Copper Bonded Rod 3M", sampling: "20/60", maxDefects: 2, checks: "1) Physical Damage: Check for dents, scratches, or cuts on the copper coating.\n2) Corrosion: Inspect for signs of oxidation.\n3) Loose connections/threads: Verify threads are clean and not damaged.\n4) Rod Straightness: Rod must be straight, with a tolerance of < 2mm per meter.\n5) Length & Diameter: Verify length (3000mm) and diameter (e.g., 14.2mm or 17.2mm) with a micrometer.\n6) Coating Thickness: Copper bonding thickness must be min 250 microns." },
+        "cham": { name: "EARTHING: PVC Chamber", sampling: "5/50", maxDefects: 2, checks: "1) Material Grade: Check for deformation, UV resistance, and brittleness.\n2) Dimensions: Verify diameter, height, and wall thickness.\n3) Weight: Check if weight matches specifications.\n4) Damage: Inspect for cuts, breaks, or manufacturing defects.\n5) Cover: Verify lid fits properly and can handle load." },
+        "pow": { name: "EARTHING: Bentonite Powder", sampling: "20/60", maxDefects: 2, checks: "1) Packing Integrity: Check for moisture or tears in bags.\n2) Weight: Verify net weight per bag.\n3) Labeling: Check for manufacturer details, batch number, and expiry date.\n4) Physical Inspection: Powder should be fine, free from lumps, check water absorption." },
+        
+        // --- HARDWARE/CABLES ---
+        "mc4": { name: "CABLES: MC4 Connectors (M/F)", sampling: "125/800", maxDefects: 14, checks: "1) Rust on connector surface\n2) Bent pins or contacts\n3) Physical damage to plastic housing\n4) Functional check of self-locking mechanism\n5) Tightness of end cap sleeve\n6) Scratches or dents on connector\n7) Discolouration of plastic or metal parts" },
+        "lug": { name: "CABLES: Cable Lug", sampling: "50/1000", maxDefects: 2, checks: "1) Dimensional Accuracy: Match length, width, and thickness to specs\n2) Material Inspection: Check for surface cracks, fractures, or deformations\n3) Material Used: Verify material (copper, aluminum) meets BOM specs\n4) Corrosion: Inspect for signs of corrosion\n5) Smooth Surface: Free from rough edges or burrs\n6) Uniformity of Plating: Ensure uniform plating (tin or zinc) free from spots\n7) Correct Markings: Verify logo, part number, and batch number stamps\n8) Cleanliness: Surface must be clean and free from dirt/grease\n9) Packaging Integrity: Packaging must be intact" },
+        "cab": { name: "CABLES: DC Cable 4 SQMM", sampling: "8/30", maxDefects: 1, checks: "1) Sheath Damage: Check for cuts, punctures, or water ingress.\n2) Marking: Verify TUV certification, cable size, and voltage rating (1500V DC) are printed.\n3) Conductor: Copper must be tinned, check for uniform strand diameter.\n4) Insulation Thickness: Must meet specs (Tolerance: ±0.1mm).\n5) Insulation Testing: Perform continuity and insulation resistance test (Megger test).\n6) Flexibility: Cable should be flexible, check for brittleness." },
+        "tie": { name: "HARDWARE: Cable Ties (Nylon/SS)", sampling: "80/1000", maxDefects: 7, checks: "1) Type: Specify Nylon (UV resistant) or Stainless Steel (Ball Lock).\n2) Length & Width: Verify dimensions (Tolerance: ±2mm).\n3) Physical Condition: Check for cracks or manufacturing defects.\n4) Locking Mechanism: Test locking functionality (must not slip back).\n5) Discolouration: Nylon should be black for UV resistance, not grey/white." },
+        
+        // --- CONDUITS ---
+        "con": { name: "CONDUITS: PVC Pipe", sampling: "80/800", maxDefects: 10, checks: "1) Physical Damage: Check for cracks, dents, or brittle material.\n2) Dimensions: Verify outside diameter, inside diameter, and wall thickness (Tolerance: ±0.2mm).\n3) Length: Check pipe length (Tolerance: ±10mm).\n4) Finish: Interior must be smooth to prevent cable damage.\n5) Material: PVC must be fire retardant (FRLS) and UV resistant." },
+        "acc": { name: "CONDUITS: PVC Accessories (Bend/Elbow)", sampling: "80/800", maxDefects: 10, checks: "1) Physical Damage: Check for cracks, dents, or manufacturing defects.\n2) Dimensions: Verify dimensions, fitment with pipes, and smooth internal radii.\n3) Material: Must be UV resistant and fire retardant." }
     };
 
     // Populate Selector
@@ -216,7 +165,7 @@
         }
     }
 
-    // Display Data based on Selection
+    // Display Data
     function displayMaterialData() {
         const key = document.getElementById('materialSelect').value;
         const card = document.getElementById('displayCard');
@@ -232,7 +181,7 @@
         document.getElementById('displaySampling').innerText = mat.sampling || "TBD";
         document.getElementById('displayCriteria').innerText = mat.maxDefects !== null ? `≤ ${mat.maxDefects} defects` : "TBD";
         document.getElementById('displayChecks').innerText = mat.checks;
-        document.getElementById('resultBox').style.display = "none"; // Hide previous result
+        document.getElementById('resultBox').style.display = "none";
     }
 
     // Calculator Logic
